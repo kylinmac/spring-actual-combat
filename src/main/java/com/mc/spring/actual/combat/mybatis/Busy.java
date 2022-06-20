@@ -1,4 +1,4 @@
-package com.mybatis;
+package com.mc.spring.actual.combat.mybatis;
 
 import java.util.*;
 

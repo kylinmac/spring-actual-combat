@@ -1,9 +1,8 @@
 package com.mc.spring.actual.combat;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import com.alibaba.fastjson.JSONObject;
+
+import java.util.*;
 
 /**
  * @author macheng
@@ -73,12 +72,24 @@ public class Test {
         }
         return k;
     }
-
+    static     HashSet<Long> tenantIds;
     public static void main(String[] args) throws Exception {
 
 //        bestRotation(new int[]{2, 3, 1, 4, 0});
 
-        System.out.println(1&2);
+            String ids = "38,39,40";
+            tenantIds = new HashSet<>();
+            String[] longs = ((String) ids).split(",");
+            for (String value : longs) {
+                System.out.println(value);
+                System.out.println(Long.getLong(value));
+                tenantIds.add(Long.parseLong(value));
+            }
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("id",38);
+        System.out.println(tenantIds);
+            System.out.println(tenantIds.contains(jsonObject.getLong("id")));
+        System.out.println(tenantIds.contains(38L));
     }
 
     public void produce() {

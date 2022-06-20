@@ -1,4 +1,4 @@
-package com.mybatis.method;
+package com.mc.spring.actual.combat.mybatis.method;
 
 import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.injector.AbstractMethod;

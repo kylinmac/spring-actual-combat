@@ -1,4 +1,4 @@
-package com.mybatis.handler;
+package com.mc.spring.actual.combat.mybatis.handler;
 
 import com.mc.spring.actual.combat.constant.enums.BaseEnum;
 import org.apache.ibatis.type.BaseTypeHandler;

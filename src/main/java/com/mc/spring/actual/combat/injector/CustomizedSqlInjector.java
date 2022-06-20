@@ -3,9 +3,9 @@ package com.mc.spring.actual.combat.injector;
 import com.baomidou.mybatisplus.core.injector.AbstractMethod;
 import com.baomidou.mybatisplus.core.injector.DefaultSqlInjector;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
-import com.mybatis.method.MysqlInsertOrUpdateBatchMethod;
-import com.mybatis.method.StreamSelectMethod;
-import com.mybatis.method.UpdateByPrimaryKeySelectiveMethod;
+import com.mc.spring.actual.combat.mybatis.method.MysqlInsertOrUpdateBatchMethod;
+import com.mc.spring.actual.combat.mybatis.method.StreamSelectMethod;
+import com.mc.spring.actual.combat.mybatis.method.UpdateByPrimaryKeySelectiveMethod;
 
 import java.util.List;
 
