@@ -1,9 +1,8 @@
 package com.mc.spring.actual.combat;
 
-import com.alibaba.fastjson.JSONObject;
-
 import java.io.IOException;
-import java.util.ArrayList;
+import java.sql.*;
+import java.util.Properties;
 
 /**
  * @author macheng
@@ -12,23 +11,17 @@ import java.util.ArrayList;
 public class TestJoin {
 
 
-
     public static void main(String[] args) throws InterruptedException, IOException {
-        ArrayList<String> s=new ArrayList<>();
-        for (long i = 0; i < 10000; i++) {
-            JSONObject json= new JSONObject();
-            json.put("id",i);
-            s.add(json.toJSONString());
-            Thread.sleep(1);
+        final Properties p = new Properties();
+        p.put("avatica_user", "root");
+        p.put("avatica_password", "password5");
+        p.put("serialization", "protobuf");
+        try (Connection conn = DriverManager.getConnection("jdbc:avatica:remote:url=http://localhost:8765;" + "authentication=DIGEST", p)) {
+            final Statement statement = conn.createStatement();
+            final ResultSet rs = statement.executeQuery("SHOW tables");
+            rs.next();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-
-        for (long i = 0; i < 10000; i++) {
-            JSONObject json= new JSONObject();
-            json.put("ids",i);
-            s.add(json.toJSONString());
-            Thread.sleep(1);
-        }
-
-        System.in.read();
     }
 }

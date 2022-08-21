@@ -1,8 +1,6 @@
 package com.mc.spring.actual.combat.model;
 
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -17,14 +15,19 @@ import java.time.LocalDateTime;
 @Data
 @Accessors(chain = true)
 public class CreateTableEntity {
-    private String tableName;
+    private Long id;
+    private String mysqlTableName;
+    private String mysqlSchemaName;
     private String dorisTableName;
     private String keyColumns;
     private String distributedColumns;
     private String bitmapColumns;
-    private String bloomfilterColumns;
-    private String model;
-    private String patitionColumns;
-//    @TableField(typeHandler = EnumTypeHandler.class)
-//    private StatusEnum c;
+    private String bloomFilterColumns;
+    private String tableModel;
+    private String partitionColumns;
+    private String partitionRange;
+    private String partitionType;
+    private String operator;
+    private LocalDateTime createTime;
+    private LocalDateTime updateTime;
 }

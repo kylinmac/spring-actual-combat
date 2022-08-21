@@ -14,7 +14,7 @@
     <name>spring-actual-combat</name>
     <description>spring-actual-combat</description>
     <properties>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
     </properties>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/com.baomidou/dynamic-datasource-spring-boot-starter -->
@@ -23,76 +23,73 @@
             <artifactId>dynamic-datasource-spring-boot-starter</artifactId>
             <version>3.5.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.calcite.avatica</groupId>
+            <artifactId>avatica</artifactId>
+            <version>1.22.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.calcite.avatica</groupId>
+            <artifactId>avatica-server</artifactId>
+            <version>1.22.0</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-boot-starter -->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
             <version>3.5.0</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.alibaba.otter</groupId>-->
-<!--            <artifactId>canal.client</artifactId>-->
-<!--            <version>1.1.4</version>-->
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.apache.rocketmq</groupId>-->
-<!--                    <artifactId>rocketmq-client</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>ch.qos.logback</groupId>-->
-<!--                    <artifactId>logback-core</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>ch.qos.logback</groupId>-->
-<!--                    <artifactId>logback-classic</artifactId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.alibaba.otter</groupId>-->
+        <!--            <artifactId>canal.client</artifactId>-->
+        <!--            <version>1.1.4</version>-->
+        <!--            <exclusions>-->
+        <!--                <exclusion>-->
+        <!--                    <groupId>org.apache.rocketmq</groupId>-->
+        <!--                    <artifactId>rocketmq-client</artifactId>-->
+        <!--                </exclusion>-->
+        <!--                <exclusion>-->
+        <!--                    <groupId>ch.qos.logback</groupId>-->
+        <!--                    <artifactId>logback-core</artifactId>-->
+        <!--                </exclusion>-->
+        <!--                <exclusion>-->
+        <!--                    <groupId>ch.qos.logback</groupId>-->
+        <!--                    <artifactId>logback-classic</artifactId>-->
+        <!--                </exclusion>-->
+        <!--            </exclusions>-->
+        <!--        </dependency>-->
         <!-- https://mvnrepository.com/artifact/com.alibaba.otter/canal.protocol -->
-        <dependency>
-            <groupId>com.alibaba.otter</groupId>
-            <artifactId>canal.protocol</artifactId>
-            <version>1.1.4</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jdbc</artifactId>
         </dependency>
-<!--                <dependency>-->
-<!--                    <groupId>org.springframework.boot</groupId>-->
-<!--                    <artifactId>spring-boot-starter-data-redis-reactive</artifactId>-->
-<!--                </dependency>-->
+        <!--                <dependency>-->
+        <!--                    <groupId>org.springframework.boot</groupId>-->
+        <!--                    <artifactId>spring-boot-starter-data-redis-reactive</artifactId>-->
+        <!--                </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-                <dependency>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-webflux</artifactId>
-                </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-webflux</artifactId>-->
+<!--        </dependency>-->
 
-<!--                <dependency>-->
-<!--                    <groupId>org.springframework.session</groupId>-->
-<!--                    <artifactId>spring-session-data-redis</artifactId>-->
-<!--                </dependency>-->
+        <!--                <dependency>-->
+        <!--                    <groupId>org.springframework.session</groupId>-->
+        <!--                    <artifactId>spring-session-data-redis</artifactId>-->
+        <!--                </dependency>-->
 
-                <dependency>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-devtools</artifactId>
-                    <scope>runtime</scope>
-                    <optional>true</optional>
-                </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.calcite.avatica/avatica-core -->
+
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -134,11 +131,18 @@
             <artifactId>rocketmq-client</artifactId>
             <version>4.9.2</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.github.jsqlparser</groupId>-->
+<!--            <artifactId>jsqlparser</artifactId>-->
+<!--            <version>3.1</version>-->
+<!--        </dependency>-->
+        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
         <dependency>
-            <groupId>com.github.jsqlparser</groupId>
-            <artifactId>jsqlparser</artifactId>
-            <version>3.1</version>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>31.1-jre</version>
         </dependency>
+
     </dependencies>
 
     <build>

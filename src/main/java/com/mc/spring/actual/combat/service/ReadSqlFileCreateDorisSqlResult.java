@@ -49,30 +49,24 @@ public class ReadSqlFileCreateDorisSqlResult {
     public static void getCreateSql(List<String> list, StringBuilder finalSqlBuilder) throws JSQLParserException {
 
         ArrayList<String> tables = new ArrayList<>();
-        ArrayList<String> dbtables = new ArrayList<>(); for (String sql : list) {
+        ArrayList<String> dbtables = new ArrayList<>();
+        for (String sql : list) {
             //todo 字段到结尾
             StringBuilder sqlBuilder = new StringBuilder();
 
             CCJSqlParserManager parser = new CCJSqlParserManager();
             CopyOnWriteArrayList<ColumnDefinition> columnList = null; //todo 列 字段名称跟信息。
-            String tableName = ""; //todo 表名字
-            List<String> pkColumnsList = new ArrayList<>(); //todo 主键名称
+            String tableName = "";
 
-            if (sql.contains("AUTO_INCREMENT")) {
-                sql = sql.replaceAll("AUTO_INCREMENT", "");
-            }
+
             Statement stmt = parser.parse(new StringReader(sql));
             if (stmt instanceof CreateTable) {
+                //todo 表名字 get by map
                 tableName = ((CreateTable) stmt).getTable().getName();
-                List<Index> indexes = ((CreateTable) stmt).getIndexes();
-                if (indexes != null && !indexes.isEmpty()) {
-                    pkColumnsList = ((CreateTable) stmt).getIndexes().get(0).getColumnsNames();
-                }
-
                 columnList = new CopyOnWriteArrayList<>(((CreateTable) stmt).getColumnDefinitions());
             }
 
-//            sqlBuilder.append("drop table if exists " + tableName + " ;\n");
+            sqlBuilder.append("drop table if exists " + tableName + " ;\n");
 
             //todo 创建语句
             sqlBuilder.append("CREATE TABLE IF NOT EXISTS ")
@@ -94,25 +88,15 @@ public class ReadSqlFileCreateDorisSqlResult {
             CopyOnWriteArrayList<ColumnDefinition> arrayList = new CopyOnWriteArrayList<>();
 
 
-            A:
-            for (int i = 0; i < splitKey.length; i++) {
-                for (int j = 0; j < columnList.size(); j++) {
-                    ColumnDefinition next = columnList.get(j);
-                    if (next.getColumnName() != null && next.getColumnName().equals(splitKey[i])) {
-                        arrayList.add(next);
-                        columnList.remove(next);
-                        continue A;
-                    }
-                }
+            changeColumnOrderByKey(columnList, splitKey, arrayList);
 
-            }
-            arrayList.addAll(columnList);
             columnList = arrayList;
 
             //todo 全部变成varchar()
             HashMap<String, String> columnTypes = new HashMap<>();
             for (int i = 0; i < columnList.size(); i++) {
                 String columnString = columnList.get(i).toString();
+                columnString = removeUnsurpportedWord(columnString);
                 String columnName = columnList.get(i).getColumnName();
                 ColDataType columnDataType = columnList.get(i).getColDataType();
                 //todo 字段的类型
@@ -133,19 +117,7 @@ public class ReadSqlFileCreateDorisSqlResult {
 
                     sqlBuilder.append(columnName).append(" ").append(dataType).append("(").append(argumentsStringList.get(0) + "," + argumentsStringList.get(1)).append(")");
 
-                } else {
-                    if (columnString.contains("primary key")) {
-                        columnString = columnString.replaceAll("primary key", "");
-                    }
-                    if (columnString.contains("auto_increment")) {
-                        columnString = columnString.replaceAll("auto_increment", "");
-                    }
-                    if (columnString.contains(" unsigned ")) {
-                        columnString = columnString.replaceAll(" unsigned ", " ");
-                    }
-                    if (columnString.contains("zerofill")) {
-                        columnString = columnString.replaceAll("zerofill", "");
-                    }
+                }else {
 
                     if ("timestamp".equals(dataType)) {
                         dataType = "datetime";
@@ -154,44 +126,19 @@ public class ReadSqlFileCreateDorisSqlResult {
                 }
 
 
+
+
                 if (columnString.contains("not null")) {
                     sqlBuilder.append(" not null");
                 }
                 String[] s = columnString.split(" ");
                 if (columnString.contains("default")) {
-                    StringBuilder def = new StringBuilder(" default ");
-                    for (int j = 0; j < s.length; j++) {
-                        if ("default".equals(s[j])) {
-                            def.append(s[j + 1]);
-                            break;
-                        }
-                    }
-                    try {
-                        Integer integer = Integer.valueOf(def.toString());
-                        def = new StringBuilder(" default '" + integer + "'");
-                    } catch (Exception e) {
-                        if (def.charAt(def.length() - 1) != '\'') {
-                            def = new StringBuilder("");
-                        }
-                    }
-                    sqlBuilder.append(def);
+                    getDefaultValue(sqlBuilder, s);
                 }
 
                 if (columnString.contains("comment")) {
-                    sqlBuilder.append(" comment ");
-                    O:
-                    for (int j = 0; j < s.length; j++) {
-                        if ("comment".equals(s[j])) {
-                            for (int k = j + 1; k < s.length; k++) {
-                                sqlBuilder.append(s[k]);
-                                if (s[k].endsWith("'"))
-                                    break O;
-                            }
-
-                        }
-                    }
+                    getComment(sqlBuilder, s);
                 }
-
 
                 sqlBuilder.append(",").append("\n");
 
@@ -200,9 +147,8 @@ public class ReadSqlFileCreateDorisSqlResult {
 
             sqlBuilder.append("is_delete_doris tinyint(4) NULL COMMENT \"doris删除标记\")\n");
 
-            sqlBuilder.append("UNIQUE KEY(" + uniqKey);
+            sqlBuilder.append("UNIQUE KEY(" + uniqKey).append(")").append("\n");
 
-            sqlBuilder.append(")").append("\n");
             if (partition != "null") {
                 appendPartition(sqlBuilder, partition, columnTypes);
             }
@@ -212,10 +158,11 @@ public class ReadSqlFileCreateDorisSqlResult {
             sqlBuilder.delete(sqlBuilder.length() - 1, sqlBuilder.length());
             sqlBuilder.append(")").append(" ").append("BUCKETS 32").append("\n").append("PROPERTIES(\n");
             sqlBuilder.append("\"replication_num\" = \"1\"");
-//            sqlBuilder.append(",\n\"colocate_with\" = \"tenant_id\"");
-            if ("null" != YmlUtil.get(tableName + ".bloom_filter_columns") && null != YmlUtil.get(tableName + ".bloom_filter_columns")) {
-                sqlBuilder.append(",\n\"bloom_filter_columns\" = \"" + YmlUtil.get(tableName + ".bloom_filter_columns") + "\"");
-            }
+            sqlBuilder.append(",\n\"colocate_with\" = \"tenant_id\"");
+
+//            if ("null" != YmlUtil.get(tableName + ".bloom_filter_columns") && null != YmlUtil.get(tableName + ".bloom_filter_columns")) {
+//                sqlBuilder.append(",\n\"bloom_filter_columns\" = \"" + YmlUtil.get(tableName + ".bloom_filter_columns") + "\"");
+//            }
             sqlBuilder.append(")");
 //            prefixBuilder.append(sqlBuilder);
 //            createSqlList.add(prefixBuilder.toString());
@@ -225,6 +172,72 @@ public class ReadSqlFileCreateDorisSqlResult {
 
 //            System.out.println("最后的SQL = " + createSqlList.toString());
 
+    }
+
+    private static void getDefaultValue(StringBuilder sqlBuilder, String[] s) {
+        StringBuilder def = new StringBuilder(" default ");
+        for (int j = 0; j < s.length; j++) {
+            if ("default".equals(s[j])) {
+                def.append(s[j + 1]);
+                break;
+            }
+        }
+        try {
+            Integer integer = Integer.valueOf(def.toString());
+            def = new StringBuilder(" default '" + integer + "'");
+        } catch (Exception e) {
+            if (def.charAt(def.length() - 1) != '\'') {
+                def = new StringBuilder("");
+            }
+        }
+        sqlBuilder.append(def);
+    }
+
+    private static void getComment(StringBuilder sqlBuilder, String[] s) {
+        sqlBuilder.append(" comment ");
+        O:
+        for (int j = 0; j < s.length; j++) {
+            if ("comment".equals(s[j])) {
+                for (int k = j + 1; k < s.length; k++) {
+                    sqlBuilder.append(s[k]);
+                    if (s[k].endsWith("'"))
+                        break O;
+                }
+
+            }
+        }
+    }
+
+    private static void changeColumnOrderByKey(CopyOnWriteArrayList<ColumnDefinition> columnList, String[] splitKey, CopyOnWriteArrayList<ColumnDefinition> arrayList) {
+        A:
+        for (int i = 0; i < splitKey.length; i++) {
+            for (int j = 0; j < columnList.size(); j++) {
+                ColumnDefinition next = columnList.get(j);
+                if (next.getColumnName() != null && next.getColumnName().equals(splitKey[i])) {
+                    arrayList.add(next);
+                    columnList.remove(next);
+                    continue A;
+                }
+            }
+        }
+        arrayList.addAll(columnList);
+    }
+
+    private static String removeUnsurpportedWord(String columnString) {
+
+        if (columnString.contains("primary key")) {
+            columnString = columnString.replaceAll("primary key", "");
+        }
+        if (columnString.contains("auto_increment")) {
+            columnString = columnString.replaceAll("auto_increment", "");
+        }
+        if (columnString.contains(" unsigned ")) {
+            columnString = columnString.replaceAll(" unsigned ", " ");
+        }
+        if (columnString.contains("zerofill")) {
+            columnString = columnString.replaceAll("zerofill", "");
+        }
+        return columnString;
     }
 
     private static void appendPartition(StringBuilder sqlBuilder, String partition, HashMap<String, String> columnTypes) {
