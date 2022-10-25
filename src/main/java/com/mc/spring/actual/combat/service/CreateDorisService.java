@@ -38,7 +38,6 @@ public class CreateDorisService {
     private CreateTableMapper createTableMapper;
 
 
-
     public void createOdbcTable(boolean drop, String suffix, String schema, String tables, MysqlConnection mysqlConnection, StringBuilder all) {
         createTableMapper.execute("set query_timeout=3600;");
         String[] split = tables.split(",");
@@ -71,7 +70,7 @@ public class CreateDorisService {
                     return x;
                 }));
 
-                CreateTableEntity createTableEntity = new CreateTableEntity();
+                CreateTableEntity createTableEntity = CreateTableEntity.builder().build();
                 createTableEntity.setKeyColumns("");
                 concatColumn(columnList, schema, table, createTableEntity, sqlBuilder, columnMap);
 
@@ -122,7 +121,10 @@ public class CreateDorisService {
         for (String table : split) {
             StringBuilder sqlBuilder = new StringBuilder();
             try {
-                CreateTableEntity uniqueConfig = createTableMapper.getUniqueConfig(table, schema);
+                CreateTableEntity uniqueConfig = CreateTableEntity.builder()
+                        .keyColumns("")
+                        .dorisTableName(table)
+                        .build();
                 String tableComment = createTableMapper.getTableComment(table, schema);
                 uniqueConfig.setKeyColumns(uniqueConfig.getKeyColumns().replaceAll("`", "").replaceAll(" ", ""));
                 sqlBuilder.append("CREATE TABLE IF NOT EXISTS ")
@@ -150,7 +152,7 @@ public class CreateDorisService {
                     return x;
                 }));
 
-                String[] keyColumns = uniqueConfig.getKeyColumns().split(",");
+                String[] keyColumns = new String[]{"tenant_id", "created"};
                 StringBuilder sbk = new StringBuilder();
                 for (String keyColumn : keyColumns) {
                     if (columnMap.containsKey(keyColumn)) {
@@ -160,23 +162,25 @@ public class CreateDorisService {
                 sbk.deleteCharAt(sbk.length() - 1);
                 uniqueConfig.setKeyColumns(sbk.toString());
 
-                createTableMapper.updateById(uniqueConfig);
+//                createTableMapper.updateById(uniqueConfig);
                 concatColumn(columnList, schema, table, uniqueConfig, sqlBuilder, columnMap);
 
-                sqlBuilder.append("UNIQUE KEY(").append(uniqueConfig.getKeyColumns()).append(")\n");
+                sqlBuilder.append("DUPLICATE  KEY(").append(uniqueConfig.getKeyColumns()).append(")\n");
                 sqlBuilder.append("COMMENT \"").append(tableComment).append("\"\n");
 
-                concatRangePartition(sqlBuilder, uniqueConfig.getPartitionColumns(), columnMap);
-
+                //concatRangePartition(sqlBuilder, uniqueConfig.getPartitionColumns(), columnMap);
+                sqlBuilder.append("PARTITION BY RANGE(tenant_id,create_time)" +
+                        "\n(" +
+                        ")\n");
                 sqlBuilder.append("DISTRIBUTED BY HASH(");
-                sqlBuilder.append("tenant_id" + ",");
+                sqlBuilder.append("id" + ",");
                 sqlBuilder.delete(sqlBuilder.length() - 1, sqlBuilder.length());
-                sqlBuilder.append(")").append(" ").append("BUCKETS 32").append("\n").append("PROPERTIES(\n");
+                sqlBuilder.append(")").append(" ").append("BUCKETS 1").append("\n").append("PROPERTIES(\n");
                 sqlBuilder.append("\"replication_num\" = \"1\"");
-                if (!StringUtils.isEmpty(uniqueConfig.getBloomFilterColumns())) {
-                    sqlBuilder.append(",\n\"bloom_filter_columns\" = \"" + uniqueConfig.getBloomFilterColumns() + "\"");
-                }
-                sqlBuilder.append(",\n\"colocate_with\" = \"tenant_id\"");
+//                if (!StringUtils.isEmpty(uniqueConfig.getBloomFilterColumns())) {
+//                    sqlBuilder.append(",\n\"bloom_filter_columns\" = \"" + uniqueConfig.getBloomFilterColumns() + "\"");
+//                }
+//                sqlBuilder.append(",\n\"colocate_with\" = \"tenant_id\"");
 
                 sqlBuilder.append(")");
 
@@ -588,14 +592,14 @@ public class CreateDorisService {
         }
         return columnList;
     }*/
-    public String getCreateTableSqlFromDb(String tableName){
+    public String getCreateTableSqlFromDb(String tableName) {
         return createTableMapper.getCreateSql(tableName).get("Create Table");
 
     }
 
     public void moveDataByRename(String source, String target, String sourceSuffix) {
 
-        String insertSql = DorisSqlUtils.insertSql(target, createTableMapper.getDesc(source) , source);
+        String insertSql = DorisSqlUtils.insertSql(target, createTableMapper.getDesc(source), source);
         String renameSource = DorisSqlUtils.renameSql(source, source + sourceSuffix);
         String renameTarget = DorisSqlUtils.renameSql(target, source);
         createTableMapper.execute(insertSql);

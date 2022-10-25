@@ -6,6 +6,7 @@ import com.mc.spring.actual.combat.mapper.TableNineMapper;
 import com.mc.spring.actual.combat.mapper.TestThreeMapper;
 import com.mc.spring.actual.combat.model.TableNineEntity;
 import com.mc.spring.actual.combat.model.TestThree;
+import com.mc.spring.actual.combat.service.CreateDorisService;
 import com.mc.spring.actual.combat.service.TransactionTestService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.ResultContext;
@@ -24,11 +25,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
 
 @SpringBootTest
 @Slf4j
@@ -40,22 +38,24 @@ class SpringActualCombatApplicationTests {
     private TestThreeMapper testThreeMapper;
     @Autowired
     private TableNineMapper tableNineMapper;
+    @Autowired
+    CreateDorisService createDorisService;
 
     @Test
     void contextLoads() {
 
-        IntStream.range(0, 20000).parallel().forEach(x -> {
-            ArrayList<TableNineEntity> tableNineEntities = new ArrayList<>();
-
-            for (int i = 0; i < 50; i++) {
-                tableNineEntities.add(new TableNineEntity().setCKey("" + x).setId(((long) x) * 50 + i)
-                        .setCValue("" + i).setCreateTime(new Date()).setUpdateTime(new Date()));
-            }
-
-            tableNineMapper.mysqlInsertOrUpdateBatch(tableNineEntities);
-            System.out.println("SUCCESS" + x);
-        });
-
+//        IntStream.range(0, 20000).parallel().forEach(x -> {
+//            ArrayList<TableNineEntity> tableNineEntities = new ArrayList<>();
+//
+//            for (int i = 0; i < 50; i++) {
+//                tableNineEntities.add(new TableNineEntity().setCKey("" + x).setId(((long) x) * 50 + i)
+//                        .setCValue("" + i).setCreateTime(new Date()).setUpdateTime(new Date()));
+//            }
+//
+//            tableNineMapper.mysqlInsertOrUpdateBatch(tableNineEntities);
+//            System.out.println("SUCCESS" + x);
+//        });
+        createDorisService.createDorisTableByMysql("hjy", "tenant", false);
     }
 
     @Test
@@ -125,7 +125,7 @@ class SpringActualCombatApplicationTests {
 
     @Test
     public void testFinal() {
-       AtomicInteger i=new AtomicInteger(0);
+        AtomicInteger i = new AtomicInteger(0);
         testThreeMapper.selectStream(new QueryWrapper<TestThree>().select("id"), new ResultHandler<TestThree>() {
             @Override
             public void handleResult(ResultContext<? extends TestThree> resultContext) {

@@ -2,6 +2,7 @@ package com.mc.spring.actual.combat.model;
 
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @TableName("cdc_mysql_to_doris")
 @Data
 @Accessors(chain = true)
+@Builder
 public class CreateTableEntity {
     private Long id;
     private String mysqlTableName;
